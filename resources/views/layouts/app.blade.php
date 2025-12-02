@@ -17,8 +17,8 @@
                     <ul class="space-y-3">
                         <li><a class="hover:text-yellow-300 block" href="{{ route('dashboard') }}">Dashboard</a></li>
                         <li><a class="hover:text-yellow-300 block" href="{{ route('mapel.index') }}">Data Mapel</a></li>
-                        <li><a class="hover:text-yellow-300 block" href="{{ route('guru.index') }}">Data Guru</a></li>
-                       
+             
+                          <li><a class="hover:text-yellow-300 block" href="{{ route('admin.users.index') }}">Data user</a></li>                    
                     </ul>
                     <hr class="my-4 border-gray-600">
                     <form method="POST" action="{{ route('logout') }}">
