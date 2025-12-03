@@ -7,47 +7,49 @@ use App\Models\User;
 
 class UserManagementController extends Controller
 {
-// Controller
-public function index() {
-    $users = User::all();
-    return view('admin.users.index', compact('users')); // halaman CRUD user
-}
+    // Controller index
+    public function index() {
+        $users = User::all();
+        return view('admin.users.index', compact('users'));
+    }
 
+    public function dashboard() {
+        $totalUsers = User::count();
+        $totalGuru = User::where('role', 'guru')->count();
+        $totalSiswa = User::where('role', 'siswa')->count();
+        $totalAdmin = User::where('role', 'admin')->count();
 
+        return view('dashboard.admin', compact('totalUsers', 'totalGuru', 'totalSiswa', 'totalAdmin'));
+    }
 
-public function dashboard() {
-    $totalUsers = \App\Models\User::count();
-    $totalGuru = \App\Models\User::where('role', 'guru')->count();
-    $totalSiswa = \App\Models\User::where('role', 'siswa')->count();
-    $totalAdmin = \App\Models\User::where('role', 'admin')->count();
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'role' => 'required|in:admin,guru,siswa',
+        ]);
 
-    return view('dashboard.admin', compact('totalUsers', 'totalGuru', 'totalSiswa', 'totalAdmin'));
-}
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+        ]);
 
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
+    }
 
+    // DELETE user
+    public function destroy(User $user)
+    {
+        if (auth()->id() == $user->id) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
 
+        $user->delete();
 
-
-
-public function store(Request $request)
-{
-    // Validasi input
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|string|min:8',
-        'role' => 'required|in:admin,guru,siswa',
-    ]);
-
-    // Buat user baru
-    User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => bcrypt($request->password),
-        'role' => $request->role,
-    ]);
-
-    return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
-}
-
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
+    }
 }
