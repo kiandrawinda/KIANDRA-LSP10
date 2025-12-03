@@ -17,20 +17,16 @@ Route::get('/', function () {
 // ==============================
 // Redirect Dashboard Berdasarkan Role
 // ==============================
-// Redirect Dashboard Berdasarkan Role
 Route::middleware(['auth'])->get('/dashboard', function () {
     $role = auth()->user()->role;
 
     return match($role) {
-        'admin' => redirect()->route('admin.dashboard'),
-        'guru'  => redirect()->route('guru.dashboard'),
-        'siswa' => redirect()->route('siswa.dashboard'),
-        default => abort(403, 'Role tidak dikenal'),
+        'admin'       => redirect()->route('admin.users.index'),
+        'distributor' => redirect()->route('distributor.dashboard'),
+        'pelanggan'   => redirect()->route('pelanggan.dashboard'),
+        default       => abort(403, 'Role tidak dikenal'),
     };
 })->name('dashboard');
-
-
-
 
 // ==============================
 // PROFILE USER (SEMUA ROLE)
@@ -42,23 +38,20 @@ Route::middleware('auth')->group(function () {
 });
 
 // ==============================
-// ADMIN AREA
+// ADMIN AREA (dulu Karyawan)
 // ==============================
 Route::middleware(['auth','role:admin'])->group(function () {
 
     // Dashboard Admin
-// Dashboard Admin
-Route::get('/admin/dashboard', [UserManagementController::class, 'dashboard'])
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.dashboard');
+    Route::get('/admin/dashboard', function() {
+        return redirect()->route('admin.users.index');
+    })->name('admin.dashboard');
 
-
-
-// CRUD User
-Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
-Route::post('/admin/users', [UserManagementController::class, 'store'])->name('admin.users.store');
-Route::patch('/admin/users/{user}/role', [UserManagementController::class, 'updateRole'])->name('admin.users.updateRole');
-Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+    // CRUD User
+    Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
+    Route::post('/admin/users', [UserManagementController::class, 'store'])->name('admin.users.store');
+    Route::patch('/admin/users/{user}/role', [UserManagementController::class, 'updateRole'])->name('admin.users.updateRole');
+    Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
 
     // Resource Controller
     Route::resource('mapel', MapelController::class);
@@ -67,29 +60,29 @@ Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'
 });
 
 // ==============================
-// GURU AREA
+// DISTRIBUTOR AREA (dulu Kasir)
 // ==============================
-Route::middleware(['auth','role:guru'])->group(function () {
+Route::middleware(['auth','role:distributor'])->group(function () {
 
-    // Dashboard Guru
-    Route::get('/dashboard/guru', function () {
-        return view('dashboard.guru');
-    })->name('guru.dashboard');
+    // Dashboard Distributor
+    Route::get('/dashboard/distributor', function () {
+        return view('dashboard.distributor'); // buat view baru
+    })->name('distributor.dashboard');
 
-    // Tambahkan fitur guru lainnya di sini
+    // Tambahkan fitur distributor lainnya di sini
 });
 
 // ==============================
-// SISWA AREA
+// PELANGGAN AREA (dulu Siswa)
 // ==============================
-Route::middleware(['auth','role:siswa'])->group(function () {
+Route::middleware(['auth','role:pelanggan'])->group(function () {
 
-    // Dashboard Siswa
-    Route::get('/dashboard/siswa', function () {
-        return view('dashboard.siswa');
-    })->name('siswa.dashboard');
+    // Dashboard Pelanggan
+    Route::get('/dashboard/pelanggan', function () {
+        return view('dashboard.pelanggan');
+    })->name('pelanggan.dashboard');
 
-    // Tambahkan fitur siswa lainnya di sini
+    // Tambahkan fitur pelanggan lainnya di sini
 });
 
 require __DIR__.'/auth.php';

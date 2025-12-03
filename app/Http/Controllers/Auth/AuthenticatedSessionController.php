@@ -11,45 +11,30 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
     public function create(): View
     {
         return view('auth.login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
- public function store(LoginRequest $request): RedirectResponse
-{
-    $request->authenticate();
-    $request->session()->regenerate();
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
+        $request->session()->regenerate();
 
-    if (auth()->user()->role === 'admin') {
-        return redirect()->route('admin.dashboard');
+        $role = auth()->user()->role;
+
+        return match($role) {
+            'admin'       => redirect()->route('admin.users.index'), // langsung ke daftar user
+            'distributor' => redirect()->route('distributor.dashboard'),
+            'pelanggan'   => redirect()->route('pelanggan.dashboard'),
+            default       => abort(403, 'Role tidak dikenal'),
+        };
     }
 
-    if (auth()->user()->role === 'guru') {
-        return redirect()->route('guru.dashboard');
-    }
-
-    return redirect()->route('siswa.dashboard'); // default siswa
-}
-
-
-
-
-    /**
-     * Destroy an authenticated session.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

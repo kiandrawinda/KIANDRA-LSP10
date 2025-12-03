@@ -7,19 +7,19 @@ use App\Models\User;
 
 class UserManagementController extends Controller
 {
-    // Controller index
-    public function index() {
-        $users = User::all();
-        return view('admin.users.index', compact('users'));
-    }
+    public function index()
+    {
+        $users = User::paginate(5);
 
-    public function dashboard() {
+        // Statistik untuk card dashboard
         $totalUsers = User::count();
-        $totalGuru = User::where('role', 'guru')->count();
-        $totalSiswa = User::where('role', 'siswa')->count();
         $totalAdmin = User::where('role', 'admin')->count();
+        $totalDistributor = User::where('role', 'distributor')->count();
+        $totalPelanggan = User::where('role', 'pelanggan')->count();
 
-        return view('dashboard.admin', compact('totalUsers', 'totalGuru', 'totalSiswa', 'totalAdmin'));
+        return view('admin.users.index', compact(
+            'users', 'totalUsers', 'totalAdmin', 'totalDistributor', 'totalPelanggan'
+        ));
     }
 
     public function store(Request $request)
@@ -28,7 +28,7 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,guru,siswa',
+            'role' => 'required|in:admin,distributor,pelanggan',
         ]);
 
         User::create([
@@ -41,7 +41,22 @@ class UserManagementController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
     }
 
-    // DELETE user
+    public function dashboard()
+    {
+        // Bisa langsung redirect ke users.index
+        return redirect()->route('admin.users.index');
+    }
+
+    public function updateRole(Request $request, User $user)
+    {
+        $request->validate([
+            'role' => 'required|in:admin,distributor,pelanggan',
+        ]);
+
+        $user->update(['role' => $request->role]);
+        return redirect()->route('admin.users.index')->with('success', 'Role berhasil diupdate.');
+    }
+
     public function destroy(User $user)
     {
         if (auth()->id() == $user->id) {
@@ -49,7 +64,6 @@ class UserManagementController extends Controller
         }
 
         $user->delete();
-
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
     }
 }

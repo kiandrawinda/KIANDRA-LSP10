@@ -21,7 +21,7 @@
     </div>
 
     {{-- Admin user management --}}
-    @if(auth()->user()->role == 'admin')
+    @if(auth()->user()->role == 'karyawan')
         <div class="mt-10">
             <h2 class="text-lg font-bold mb-4">Manajemen Pengguna</h2>
             @if(session('success'))

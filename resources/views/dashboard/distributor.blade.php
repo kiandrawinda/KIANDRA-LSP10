@@ -11,7 +11,7 @@
             <ul class="space-y-3">
                 <li><a href="{{ route('dashboard') }}" class="hover:text-yellow-300">Dashboard</a></li>
 
-                @if(auth()->user()->role == 'guru')
+                @if(auth()->user()->role == 'pelanggan')
                     <li><a href="{{ route('guru.dashboard') }}" class="hover:text-yellow-300">Dashboard Guru</a></li>
                 @endif
             </ul>
